@@ -117,7 +117,7 @@ jobs:
             -DGGML_RPC=OFF \
             -DLLAMA_BUILD_EXAMPLES=OFF \
             -DLLAMA_BUILD_TESTS=OFF \
-            -DLLAMA_BUILD_TOOLS=OFF \
+            -DLLAMA_BUILD_TOOLS=ON \
             -DLLAMA_BUILD_SERVER=ON \
             -DLLAMA_BUILD_UI=OFF \
             -DOpenCL_INCLUDE_DIR="${GITHUB_WORKSPACE}/deps/OpenCL-Headers" \
