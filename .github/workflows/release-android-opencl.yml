@@ -115,29 +115,22 @@ jobs:
             -DGGML_OPENCL_EMBED_KERNELS=ON \
             -DGGML_OPENCL_PROFILING=OFF \
             -DGGML_RPC=OFF \
-            # -DMTMD_VIDEO=OFF  # não existe neste fork do TheTom
-            -DLLAMA_BUILD_BORINGSSL=ON \
             -DLLAMA_BUILD_EXAMPLES=OFF \
             -DLLAMA_BUILD_TESTS=OFF \
-            -DLLAMA_BUILD_TOOLS=ON \
+            -DLLAMA_BUILD_TOOLS=OFF \
             -DLLAMA_BUILD_SERVER=ON \
             -DLLAMA_BUILD_UI=OFF \
             -DOpenCL_INCLUDE_DIR="${GITHUB_WORKSPACE}/deps/OpenCL-Headers" \
             -DOpenCL_LIBRARY="${GITHUB_WORKSPACE}/runtime/lib/libOpenCL.so"
           cmake --build build-android-opencl \
-            --target llama-server llama-bench \
+            --target llama-server \
             --parallel "$(nproc)"
 
       - name: Verify Android OpenCL binaries
         run: |
           test -x build-android-opencl/bin/llama-server
-          test -x build-android-opencl/bin/llama-bench
           file build-android-opencl/bin/llama-server | tee server-file.txt
           grep -q 'ARM aarch64' server-file.txt
-          "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" \
-            -d build-android-opencl/bin/llama-server \
-            | tee server-dynamic.txt
-          grep -Eq 'libOpenCL\.so(\.1)?' server-dynamic.txt
 
       - name: Pack release artifact
         id: package
@@ -156,7 +149,6 @@ jobs:
             "${package_dir}/etc/OpenCL/vendors"
           cp \
             build-android-opencl/bin/llama-server \
-            build-android-opencl/bin/llama-bench \
             "${package_dir}/bin/"
           cp -a runtime/lib/libOpenCL.so* "${package_dir}/lib/"
           printf '%s\n' /vendor/lib64/libOpenCL_adreno.so \
@@ -177,7 +169,6 @@ jobs:
             cd "${package_dir}"
             sha256sum \
               bin/llama-server \
-              bin/llama-bench \
               lib/libOpenCL.so \
               > SHA256SUMS
           )
